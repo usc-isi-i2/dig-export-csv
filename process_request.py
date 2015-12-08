@@ -28,11 +28,34 @@ def processcsv():
         print >> sys.stderr,e
         loge(str(e))
 
-@app.route('/export/<username>',method=['POST'])
+@app.route('/export/<username>',method=['GET'])
 def get_user_folders(username):
     bf = BulkFolders()
     return bf.construct_tsv_response(bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(username))))
 
+
+@app.route('/export/postids',method=['POST'])
+def get_post_ids():
+    try:
+        json_data=json.loads(str(request.get_data()))
+        postids=json_data['postids'].split(',')
+        result=[]
+        esm = ElasticSearchManager()
+        bf=BulkFolders()
+        for postid in postids:
+            res=esm.search_es(esm.create_postid_query(postid))
+            hits=res['hits']['hits']
+            ads=map(lambda x:x['_source'],hits)
+            for ad in ads:
+                if postid in ad['url']:
+                    tab_separated="\t".join(bf.ht_to_array(ad))
+                    result.append(tab_separated)
+
+        return result
+
+    except Exception as e:
+        print >> sys.stderr,e
+        loge(str(e))
 
 def process_results(bf,res):
     result=[]

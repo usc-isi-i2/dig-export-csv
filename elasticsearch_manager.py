@@ -60,3 +60,6 @@ class ElasticSearchManager(object):
 
     def create_terms_query(self,field, values):
         return json.dumps({'query':{'filtered':{'terms':{field:values}}}})
+
+    def create_postid_query(self,postid):
+        return json.dumps({'query':{'query_string':{'default_field':'_all','query':postid}}})
