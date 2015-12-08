@@ -80,7 +80,7 @@ def ht_to_array(ht):
     body = body.replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
     # I give up, the exported TSV file looks correct, Karma can import it
     # correctly, but it is messed up in Excel or Numbers
-    #body = 'removed'
+    body = 'removed'
 
     result = [
         identifier_str,
