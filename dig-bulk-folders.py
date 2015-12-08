@@ -234,16 +234,9 @@ def write_tsv(file_name, lines):
 write_tsv(
     'folder_export.tsv',
     dereference_uris(
-        'txdps:TheMemexLives!',
+        'login:password!',
         'dig.istresearch.com:5443',
         construct_uri_to_folder_map(get_folders(
-            'txdps:TheMemexLives!',
+            'login:password',
             'dig.istresearch.com:5443'))))
 
-# format_tsv_lines(
-#     get_folder_contents_as_lines(
-#         'txdps:TheMemexLives!',
-#         'dig.istresearch.com:5443'))
-
-# format_tsv_lines(print_greg_folders('txdps:TheMemexLives!'))
-# get_greg_folders()
