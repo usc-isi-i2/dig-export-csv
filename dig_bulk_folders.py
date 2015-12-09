@@ -1,5 +1,5 @@
 import json
-from http.client import HTTPSConnection
+from httplib import HTTPSConnection
 from base64 import b64encode
 import ConfigParser
 from elasticsearch_manager import ElasticSearchManager
@@ -71,11 +71,15 @@ class BulkFolders(object):
     def ht_to_array(self,ht):
         """Create an array containing all the values we want to export from a
         WebPage object, ht."""
+
         identifier = ht.get('hasIdentifier', {})
         identifier_str = ''
         if isinstance(identifier, list):
-            identifier_str = "|".join(
-                map(lambda x: x.get('label', ''), identifier_str))
+            #identifier_str = "|".join(map(lambda x: x.get('label', ''), identifier_str))
+            for id in identifier:
+                #identifier_str = "|".join(id.get('label',''))
+                identifier_str = identifier_str + id.get('label','') + "|"
+            identifier_str = identifier_str[0:len(identifier_str)-1]
         else:
             identifier_str = identifier.get('label', '')
 
@@ -156,7 +160,6 @@ class BulkFolders(object):
 
         res = conn.getresponse()
         data = res.read()
-
         return json.loads(data.decode("utf-8"))
 
     def format_tsv_lines(self,lines):

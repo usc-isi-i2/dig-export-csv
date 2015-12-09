@@ -5,17 +5,20 @@ import sys
 from flask import request
 import json
 from elasticsearch_manager import ElasticSearchManager
-from dig-bulk-folders import BulkFolders
+from dig_bulk_folders import BulkFolders
 
 app = Flask(__name__)
+
+
+@app.route('/')
+def hello():
+    return 'hello'
 
 @app.route('/export/csv',methods=['POST'])
 def processcsv():
     try:
         json_data = json.loads(str(request.get_data()))
         esm=ElasticSearchManager()
-
-        bf = BulkFolders()
 
         es_request = esm.convert_csv_to_esrequest(json_data['csv'])
 
@@ -28,29 +31,35 @@ def processcsv():
         print >> sys.stderr,e
         loge(str(e))
 
-@app.route('/export/<username>',method=['GET'])
+@app.route('/export/<username>',methods=['GET'])
 def get_user_folders(username):
     bf = BulkFolders()
+    print username
     return bf.construct_tsv_response(bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(username))))
 
 
-@app.route('/export/postids',method=['POST'])
+@app.route('/export/postids',methods=['POST'])
 def get_post_ids():
     try:
         json_data=json.loads(str(request.get_data()))
         postids=json_data['postids'].split(',')
-        result=[]
+        result=''
         esm = ElasticSearchManager()
         bf=BulkFolders()
         for postid in postids:
             res=esm.search_es(esm.create_postid_query(postid))
             hits=res['hits']['hits']
-            ads=map(lambda x:x['_source'],hits)
+            ads=[]
+            for hit in hits:
+                ads.append(hit['_source'])
+            #ads=map(lambda x:x['_source'],hits)
+
             for ad in ads:
                 if postid in ad['url']:
                     tab_separated="\t".join(bf.ht_to_array(ad))
-                    result.append(tab_separated)
+                    result = result + tab_separated + '\n'
 
+        print result
         return result
 
     except Exception as e:
@@ -75,3 +84,6 @@ def loge(message):
 def logi(message):
 
     app.logger.info('INFO:' + message)
+
+if __name__ == "__main__":
+    app.run()

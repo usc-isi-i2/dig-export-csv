@@ -4,6 +4,7 @@ import json
 import ConfigParser
 from elasticsearch import Elasticsearch
 from flask import Flask
+import requests
 
 app = Flask(__name__)
 
@@ -13,12 +14,12 @@ class ElasticSearchManager(object):
         configuration = ConfigParser.RawConfigParser()
         configuration.read('config.properties')
         self.eshostname=configuration.get('ElasticSearch','host')
-        self.esport=configuration.get('Elasticsearch','port')
-        self.esprotocol=configuration.get('Elasticsearch','protocol')
-        self.index=configuration.get('Elasticsearch','index')
-        self.type=configuration.get('Elasticsearch','type')
-        self.esusername=configuration.get('Elasticsearch','username')
-        self.espassword=configuration.get('Elasticsearch','password')
+        self.esport=configuration.get('ElasticSearch','port')
+        self.esprotocol=configuration.get('ElasticSearch','protocol')
+        self.index=configuration.get('ElasticSearch','index')
+        self.type=configuration.get('ElasticSearch','type')
+        self.esusername=configuration.get('ElasticSearch','username')
+        self.espassword=configuration.get('ElasticSearch','password')
         self.es = self.getESObject()
 
     def getESObject(self):
