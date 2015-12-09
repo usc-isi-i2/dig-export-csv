@@ -6,7 +6,7 @@ import requests
 username='memex'
 url='http://localhost:5000/export/' + username
 
-r=requests.get(url)
+r=requests.post(url,json={"password":""})
 print r._content
 
 
