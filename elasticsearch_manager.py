@@ -32,12 +32,17 @@ class ElasticSearchManager(object):
         es = Elasticsearch([esUrl], show_ssl_warnings=False)
         return es
 
-    def search_es(self,query):
-        res = self.es.search(index=self.index,doc_type=self.type, body=query)
+    def search_es(self,query,size):
+
+        if size is not None:
+            query['size']=size
+
+        print query
+        res = self.es.search(index=self.index,doc_type=self.type, body=json.dumps(query))
         return res
 
-    def convert_csv_to_esrequest(self,csv_text):
-        lines=csv_text.split('\n')
+    def convert_csv_to_esrequest(self,lines):
+        #lines=csv_text.split('\n')
 
         es_request={}
         ids = []
@@ -57,10 +62,10 @@ class ElasticSearchManager(object):
         return es_request
 
     def create_ids_query(self,ids):
-        return json.dumps({'query':{'ids':{'values':ids}}})
+        return {'query':{'ids':{'values':ids}}}
 
     def create_terms_query(self,field, values):
-        return json.dumps({'query':{'filtered':{'terms':{field:values}}}})
+        return {'query':{'filtered':{'filter':{'term':{field:values}}}}}
 
     def create_postid_query(self,postid):
-        return json.dumps({'query':{'query_string':{'default_field':'_all','query':postid}}})
+        return {'query':{'query_string':{'default_field':'_all','query':postid}}}

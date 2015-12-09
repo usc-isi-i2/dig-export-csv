@@ -22,38 +22,54 @@ def processcsv():
 
         es_request = esm.convert_csv_to_esrequest(json_data['csv'])
 
-        if 'ids' in es_request:
-            return process_results(esm.search_es(esm.create_ids_query(es_request['ids'])))
-        if 'phone' in es_request:
-            return process_results(esm.search_es(esm.create_terms_query('phone',es_request['phone'])))
+        if 'size' in json_data:
+            size=json_data['size']
+        else:
+            size='20'
+        bf =BulkFolders()
 
+        result = ''
+
+        phone_field = 'hasFeatureCollection.phonenumber_feature.phonenumber'
+        if 'ids' in es_request:
+            result= result + process_results(bf,esm.search_es(esm.create_ids_query(es_request['ids']),None))
+        if 'phone' in es_request:
+            result = result + process_results(bf,esm.search_es(esm.create_terms_query(phone_field,es_request['phone']),int(size))) + '\n'
+
+        return result
     except Exception as e:
         print >> sys.stderr,e
         loge(str(e))
 
-@app.route('/export/<username>',methods=['GET'])
+@app.route('/export/<username>',methods=['POST'])
 def get_user_folders(username):
+
+    json_data=json.loads(str(request.get_data()))
+    password=json_data['password']
     bf = BulkFolders()
-    print username
-    return bf.construct_tsv_response(bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(username))))
+    return bf.construct_tsv_response(bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(username,password))))
 
 
 @app.route('/export/postids',methods=['POST'])
 def get_post_ids():
     try:
         json_data=json.loads(str(request.get_data()))
+
+        if 'size' in json_data:
+            size=json_data['size']
+        else:
+            size='20'
+
         postids=json_data['postids'].split(',')
         result=''
         esm = ElasticSearchManager()
         bf=BulkFolders()
         for postid in postids:
-            res=esm.search_es(esm.create_postid_query(postid))
+            res=esm.search_es(esm.create_postid_query(postid),int(size))
             hits=res['hits']['hits']
             ads=[]
             for hit in hits:
                 ads.append(hit['_source'])
-            #ads=map(lambda x:x['_source'],hits)
-
             for ad in ads:
                 if postid in ad['url']:
                     tab_separated="\t".join(bf.ht_to_array(ad))
@@ -67,14 +83,16 @@ def get_post_ids():
         loge(str(e))
 
 def process_results(bf,res):
-    result=[]
-
+    result=''
     hits = res['hits']['hits']
-    ads = map(lambda x: x['_source'], hits)
+    ads=[]
+    for hit in hits:
+        ads.append(hit['_source'])
+
     for ad in ads:
         tab_separated = "\t".join(bf.ht_to_array(ad))
-        result.append(tab_separated)
-    return result
+        result = result + tab_separated + '\n'
+    return result[:result.rfind('\n')]
 
 
 def loge(message):

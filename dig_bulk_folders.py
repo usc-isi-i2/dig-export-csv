@@ -30,8 +30,6 @@ class BulkFolders(object):
         configuration=ConfigParser.RawConfigParser()
         configuration.read('config.properties')
         self.bulkfoldersurl=configuration.get('BulkFolders','bulkapiurl')
-        self.bulkfoldersuser=configuration.get('BulkFolders','bulkapiuser')
-        self.bulkfolderspassword=configuration.get('BulkFolders','bulkapipassword')
 
     def get_feature_values(self,obj_or_array):
         """Given the values of a single feature, return them as a string.
@@ -111,7 +109,7 @@ class BulkFolders(object):
         eg "els.istresearch.com:39200"
         """
         esm = ElasticSearchManager()
-        results=esm.search_es(esm.create_ids_query(uri_list))
+        results=esm.search_es(esm.create_ids_query(uri_list),None)
         # print(results)
         hits = results['hits']['hits']
         return map(lambda x: x['_source'], hits)
@@ -145,10 +143,10 @@ class BulkFolders(object):
 
         return result
 
-    def get_folders(self,username):
+    def get_folders(self,username,password):
         """Return JSON array of folder contents"""
 
-        credentials = self.bulkfoldersuser + ":" + self.bulkfolderspassword
+        credentials = username + ":" + password
         conn = HTTPSConnection(self.bulkfoldersurl)
         userAndPass = b64encode(credentials).decode("ascii")
         headers = {
