@@ -7,14 +7,14 @@ import json
 from elasticsearch_manager import ElasticSearchManager
 from dig_bulk_folders import BulkFolders
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 
-@app.route('/')
+@application.route('/')
 def hello():
     return 'hello'
 
-@app.route('/export/csv',methods=['POST'])
+@application.route('/export/csv',methods=['POST'])
 def processcsv():
     try:
         json_data = json.loads(str(request.get_data()))
@@ -41,7 +41,7 @@ def processcsv():
         print >> sys.stderr,e
         loge(str(e))
 
-@app.route('/export/<username>',methods=['POST'])
+@application.route('/export/<username>',methods=['POST'])
 def get_user_folders(username):
 
     json_data=json.loads(str(request.get_data()))
@@ -50,7 +50,7 @@ def get_user_folders(username):
     return bf.construct_tsv_response(bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(username,password))))
 
 
-@app.route('/export/postids',methods=['POST'])
+@application.route('/export/postids',methods=['POST'])
 def get_post_ids():
     try:
         json_data=json.loads(str(request.get_data()))
@@ -97,11 +97,11 @@ def process_results(bf,res):
 
 def loge(message):
 
-    app.logger.error('Error:' + message)
+    application.logger.error('Error:' + message)
 
 def logi(message):
 
-    app.logger.info('INFO:' + message)
+    application.logger.info('INFO:' + message)
 
 if __name__ == "__main__":
-    app.run()
+    application.run()
