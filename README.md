@@ -9,7 +9,7 @@ Open a terminal, type
 Open a terminal,  
 1. ```git clone https://github.com/usc-isi-i2/dig-export-csv.git```  
 2. ```cd dig-export-csv```  
-3. ```virtual env```  
+3. ```virtualenv venv```  
 4. ```. venv/bin/activate```  
 5. ``` pip install flask```  
 6. ```pip install elasticsearch```  
