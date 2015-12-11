@@ -22,26 +22,91 @@ You should see a message
 ``` * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)```  
 
 ##API    
-###/export/username
+###GET /api/users/\<user\>/folders/_all/ads  
+Retrieves the ads for a given user from all folders.
+
+**Method:** GET
+
+**Basic Authentication:** YES
+
+**Parameters:**
+
+| Parameter | Description | Required |
+| --------- | ----------- | -------- |
+| user  | dig user name | Yes |
+
+**Example:**
 ```      
-Request Type : POST    
-Parameters : {"password":""}    
-Example run : python tests/test_folder_names.py
+curl -u <user>:<password> localhost:5000/api/users/memex/folders/_all/ads
 ```   
-###/export/postids
+###GET /api/ads?post_ids='id1,id2,id3'
+Retrieves the ads that contain the given post ids in the url of the ad
+
+**Method:** GET
+
+**Basic Authentication:** NO
+
+**Parameters:**
+
+| Parameter | Description | Required |
+| --------- | ----------- | -------- |
+| post_ids  | comma separated string of post ids | Yes |
+| size  | number of ads returned per post id, default = 20 | No |
+
+**Example:**
+```      
+curl localhost:5000/api/ads?post_ids=20212377,20212378&size=40
+```   
+###GET /api/ads?uri='a uri goes here'
+Retrieve the ad that has the given URI
+
+**Method:** GET
+
+**Basic Authentication:** NO
+
+**Parameters:**
+
+| Parameter | Description | Required |
+| --------- | ----------- | -------- |
+| uri  | uri of the ad as indexed in ElasticSearch | Yes |
+
+**Example:**
+```      
+curl localhost:5000/api/ads?uri=http://dig.isi.edu/ht/data/page/47561AE61432324E428A67DA4763EAA1DB1809F7/1440921440000/processed
 ```
-Request Type : POST    
-Parameters : {"postids":"20212377","size":"20"}   
-Example run : python tests/test_export_postids.py
-```   
-###/export/csv
-```  
-Request Type : POST    
-Parameters : {"csv":lines,"size":"40"}  
-Example run : python tests/test_input_csv.py  
-```  
-where lines is of the format 'uri,phonenumber' , sample in tests/test_input.csv
+###GET api/ads?phone='a phone goes here'
+Retrieve all the ads that contain the given phone.
 
+**Method:** GET
 
+**Basic Authentication:** NO
 
+**Parameters:**
 
+| Parameter | Description | Required |
+| --------- | ----------- | -------- |
+| phone  | phone number to be searched in ads | Yes |
+| size  | number of ads returned, default = 20 | No |
+
+**Example:**
+```      
+curl localhost:5000/api/ads?phone=8104496460
+```
+###POST api/ads/bulk-query
+Fetch the ads that satisfy the query given in the body. The query consists of a CSV file with a spec per line. The spec contains headings such as URI, phone.
+
+**Method:** POST
+
+**Basic Authentication:** NO
+
+**Parameters:**
+
+| Parameter | Description | Required |
+| --------- | ----------- | -------- |
+| csv  | lines in the format uri,phone | Yes |
+| size  | number of ads returned matching phone numbers, default = 20 | No |
+
+**Example:**
+```      
+curl localhost:5000/api/ads?phone=8104496460
+```
