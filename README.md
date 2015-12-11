@@ -108,5 +108,5 @@ Fetch the ads that satisfy the query given in the body. The query consists of a 
 
 **Example:**
 ```      
-curl localhost:5000/api/ads?phone=8104496460
+curl -X POST  localhost:5000/api/ads/bulk-query -d '{"csv":["http://dig.isi.edu/ht/data/page/47561AE61432324E428A67DA4763EAA1DB1809F7/1440921440000/processed,8104496460"]}'
 ```
