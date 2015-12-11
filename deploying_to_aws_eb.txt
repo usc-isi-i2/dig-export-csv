@@ -1,0 +1,23 @@
+git clone https://github.com/usc-isi-i2/dig-export-csv.git
+cd dig-export-csv
+virtualenv venv
+. venv/bin/activate
+pip install flask
+pip install requests
+pip install elasticsearch
+pip freeze >requirements.txt
+mkdir .ebextensions
+cd .ebextensions
+create a file named <application_name>.config
+add  the following line to the config file
+option_settings:
+   "aws:elasticbeanstalk:container:python:staticfiles":
+     "/static/": "static/" 
+
+cd ..
+deactivate
+eb init --region us-west-2
+git add venv
+git add requirements.txt
+git add .ebextensions
+eb create(if first time) or eb deploy if updating
