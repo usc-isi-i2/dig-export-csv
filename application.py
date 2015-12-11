@@ -1,107 +1,159 @@
 __author__ = 'amandeep'
 
-from flask import Flask
-import sys
-from flask import request
 import json
+from flask import request
+from flask import Response
+from functools import wraps
+from flask import Flask
 from elasticsearch_manager import ElasticSearchManager
 from dig_bulk_folders import BulkFolders
 
 application = Flask(__name__)
 
 
-@application.route('/')
-def hello():
-    return 'hello'
+phone_field = 'hasFeatureCollection.phonenumber_feature.phonenumber'
 
-@application.route('/export/csv',methods=['POST'])
-def processcsv():
+
+def check_auth(username, password):
+    return username is not None and password is not None
+
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+
+@application.route('/', methods=['GET'])
+def instructions():
+    return 'Read api details at - https://github.com/usc-isi-i2/dig-export-csv'
+
+
+@application.route('/api/ads', methods=['GET'])
+def get_ads():
+    es = ElasticSearchManager()
+    bf = BulkFolders()
+
+    ad_id = request.args.get('uri')
+    postids = request.args.get('post_ids')
+    phone = request.args.get('phone')
+    size = request.args.get('size')
+    if size is None:
+        size = "20"
+
+    try:
+        if ad_id is not None:
+            ids = [ad_id]
+            return Response(process_results(bf, es.search_es(ElasticSearchManager.create_ids_query(ids), None)), 200)
+    except Exception as e:
+        return Response(str(e), 500)
+
+    try:
+        if postids is not None:
+            post_ids = postids.split(',')
+            result = ''
+            for post_id in post_ids:
+                res = es.search_es(ElasticSearchManager.create_postid_query(post_id), int(size))
+                hits = res['hits']['hits']
+                for hit in hits:
+                    ad = hit['_source']
+                    if post_id in ad['url']:
+                        tab_separated = "\t".join(bf.ht_to_array(ad))
+                        result = result + tab_separated + '\n'
+
+            return Response(result, 200)
+    except Exception as e:
+        return Response(str(e), 500)
+
+    try:
+        if phone is not None:
+            phones = [phone]
+            return Response(process_results(bf, es.search_es(
+                ElasticSearchManager.create_terms_query(phone_field, phones), int(size))), 200)
+    except Exception as e:
+        return Response(str(e), 500)
+
+
+@application.route('/api/ads/bulk-query', methods=['POST'])
+def process_csv():
     try:
         json_data = json.loads(str(request.get_data()))
-        esm=ElasticSearchManager()
+        esm = ElasticSearchManager()
 
-        es_request = esm.convert_csv_to_esrequest(json_data['csv'])
+        es_request = convert_csv_to_esrequest(json_data['csv'])
 
         if 'size' in json_data:
-            size=json_data['size']
+            size = json_data['size']
         else:
-            size='20'
-        bf =BulkFolders()
+            size = '20'
+        bf = BulkFolders()
 
         result = ''
 
-        phone_field = 'hasFeatureCollection.phonenumber_feature.phonenumber'
         if 'ids' in es_request:
-            result= result + process_results(bf,esm.search_es(esm.create_ids_query(es_request['ids']),None))
+            result = process_results(bf, esm.search_es(ElasticSearchManager.create_ids_query(es_request['ids']), None))
         if 'phone' in es_request:
-            result = result + process_results(bf,esm.search_es(esm.create_terms_query(phone_field,es_request['phone']),int(size))) + '\n'
+            result += process_results(bf,
+                                      esm.search_es(ElasticSearchManager.create_terms_query(phone_field,
+                                                    es_request['phone']), int(size)))
 
-        return result
+        return Response(result, 200)
     except Exception as e:
-        print >> sys.stderr,e
-        loge(str(e))
+        return Response(str(e), 500)
 
-@application.route('/export/<username>',methods=['POST'])
-def get_user_folders(username):
 
-    json_data=json.loads(str(request.get_data()))
-    password=json_data['password']
+@application.route('/api/users/<user>/folders/_all/ads', methods=['GET'])
+@requires_auth
+def get_user_folders(user):
     bf = BulkFolders()
-    return bf.construct_tsv_response(bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(username,password))))
-
-
-@application.route('/export/postids',methods=['POST'])
-def get_post_ids():
+    password = request.authorization.password
     try:
-        json_data=json.loads(str(request.get_data()))
-
-        if 'size' in json_data:
-            size=json_data['size']
-        else:
-            size='20'
-
-        postids=json_data['postids'].split(',')
-        result=''
-        esm = ElasticSearchManager()
-        bf=BulkFolders()
-        for postid in postids:
-            res=esm.search_es(esm.create_postid_query(postid),int(size))
-            hits=res['hits']['hits']
-            ads=[]
-            for hit in hits:
-                ads.append(hit['_source'])
-            for ad in ads:
-                if postid in ad['url']:
-                    tab_separated="\t".join(bf.ht_to_array(ad))
-                    result = result + tab_separated + '\n'
-
-        print result
-        return result
-
+        return Response(bf.construct_tsv_response(
+            bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password)))), 200)
     except Exception as e:
-        print >> sys.stderr,e
-        loge(str(e))
+        return Response(str(e), 200)
 
-def process_results(bf,res):
-    result=''
+
+def process_results(bf, res):
+    result = ''
     hits = res['hits']['hits']
-    ads=[]
     for hit in hits:
-        ads.append(hit['_source'])
-
-    for ad in ads:
+        ad = hit['_source']
         tab_separated = "\t".join(bf.ht_to_array(ad))
         result = result + tab_separated + '\n'
     return result[:result.rfind('\n')]
 
 
-def loge(message):
+def convert_csv_to_esrequest(lines):
 
-    application.logger.error('Error:' + message)
+    es_request = {}
+    ids = []
+    phonenumbers = []
 
-def logi(message):
+    # line is of format - uri,phonenumber etc
+    for line in lines:
+        data = line.split(',')
+        if data[0].strip() != '':
+            ids.append((data[0]))
+        if data[1].strip() != '':
+            phonenumbers.append((data[1]))
 
-    application.logger.info('INFO:' + message)
+    es_request["ids"] = ids
+    es_request["phone"] = phonenumbers
+
+    return es_request
 
 if __name__ == "__main__":
     application.run()
