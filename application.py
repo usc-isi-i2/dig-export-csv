@@ -91,7 +91,7 @@ def process_csv():
     try:
         json_data = json.loads(str(request.get_data()))
         esm = ElasticSearchManager()
-
+        print json_data
         es_request = convert_csv_to_esrequest(json_data['csv'])
 
         if 'size' in json_data:
@@ -145,13 +145,16 @@ def convert_csv_to_esrequest(lines):
     # line is of format - uri,phonenumber etc
     for line in lines:
         data = line.split(',')
-        if data[0].strip() != '':
-            ids.append((data[0]))
-        if data[1].strip() != '':
+
+        if len(data) > 1 and data[0].strip() != '':
+            ids.append(data[0])
+        if len(data) > 1 and data[1].strip() != '':
             phonenumbers.append((data[1]))
 
-    es_request["ids"] = ids
-    es_request["phone"] = phonenumbers
+    if len(ids) > 0:
+        es_request["ids"] = ids
+    if len(phonenumbers) > 0:
+        es_request["phone"] = phonenumbers
 
     return es_request
 

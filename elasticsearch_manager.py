@@ -37,7 +37,6 @@ class ElasticSearchManager(object):
 
         if size is not None:
             query['size'] = size
-
         res = self.es.search(index=self.index, doc_type=self.type, body=json.dumps(query))
         return res
 
