@@ -10,9 +10,13 @@ mkdir .ebextensions
 cd .ebextensions
 create a file named <application_name>.config
 add  the following line to the config file
-option_settings:
+ option_settings:
    "aws:elasticbeanstalk:container:python:staticfiles":
-     "/static/": "static/" 
+     "/static/": "static/"
+
+ container_commands:
+   01_wsgipass:
+     command: 'echo "WSGIPassAuthorization On" >> ../wsgi.conf'
 
 cd ..
 deactivate
