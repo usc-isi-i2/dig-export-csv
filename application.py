@@ -7,11 +7,14 @@ from functools import wraps
 from flask import Flask
 from elasticsearch_manager import ElasticSearchManager
 from dig_bulk_folders import BulkFolders
+import ConfigParser
 
 application = Flask(__name__)
 
 
 phone_field = 'hasFeatureCollection.phonenumber_feature.phonenumber'
+basic_username = ''
+basic_password = ''
 
 
 def check_auth(username, password):
@@ -36,12 +39,27 @@ def requires_auth(f):
     return decorated
 
 
+def requires_basic_auth(f):
+    @wraps(f)
+    def decorated_basic(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_basic_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated_basic
+
+
+def check_basic_auth(username, password):
+    return username == basic_username and password == basic_password
+
+
 @application.route('/', methods=['GET'])
 def instructions():
     return 'Read api details at - https://github.com/usc-isi-i2/dig-export-csv'
 
 
 @application.route('/api/ads', methods=['GET'])
+@requires_basic_auth
 def get_ads():
     es = ElasticSearchManager()
     bf = BulkFolders()
@@ -87,6 +105,7 @@ def get_ads():
 
 
 @application.route('/api/ads/bulk-query', methods=['POST'])
+@requires_basic_auth
 def process_csv():
     try:
         json_data = json.loads(str(request.get_data()))
@@ -159,4 +178,8 @@ def convert_csv_to_esrequest(lines):
     return es_request
 
 if __name__ == "__main__":
+    configuration = ConfigParser.RawConfigParser()
+    configuration.read('config.properties')
+    basic_username = configuration.get('BasicAuth', 'username')
+    basic_password = configuration.get('BasicAuth', 'password')
     application.run()
