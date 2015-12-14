@@ -13,8 +13,11 @@ application = Flask(__name__)
 
 
 phone_field = 'hasFeatureCollection.phonenumber_feature.phonenumber'
-basic_username = ''
-basic_password = ''
+
+configuration = ConfigParser.RawConfigParser()
+configuration.read('config.properties')
+basic_username = configuration.get('BasicAuth', 'username')
+basic_password = configuration.get('BasicAuth', 'password')
 
 
 def check_auth(username, password):
@@ -178,8 +181,4 @@ def convert_csv_to_esrequest(lines):
     return es_request
 
 if __name__ == "__main__":
-    configuration = ConfigParser.RawConfigParser()
-    configuration.read('config.properties')
-    basic_username = configuration.get('BasicAuth', 'username')
-    basic_password = configuration.get('BasicAuth', 'password')
     application.run()
