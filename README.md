@@ -55,7 +55,7 @@ Retrieves the ads that contain the given post ids in the url of the ad
 
 **Example:**
 ```      
-curl localhost:5000/api/ads?post_ids=20212377,20212378&size=40
+curl localhost:5000/api/ads?post_ids='20212377,20212378&size=40'
 ```   
 ###GET /api/ads?uri='a uri goes here'
 Retrieve the ad that has the given URI
