@@ -13,11 +13,18 @@ application = Flask(__name__)
 
 
 phone_field = 'hasFeatureCollection.phonenumber_feature.phonenumber'
+basic_username = None
+basic_password = None
 
-configuration = ConfigParser.RawConfigParser()
-configuration.read('config.properties')
-basic_username = configuration.get('BasicAuth', 'username')
-basic_password = configuration.get('BasicAuth', 'password')
+
+def init():
+    configuration = ConfigParser.RawConfigParser()
+    configuration.read('config.properties')
+    global basic_username
+    global basic_password
+    if basic_username is None and basic_password is None:
+        basic_username = configuration.get('BasicAuth', 'username')
+        basic_password = configuration.get('BasicAuth', 'password')
 
 
 def check_auth(username, password):
@@ -46,6 +53,7 @@ def requires_basic_auth(f):
     @wraps(f)
     def decorated_basic(*args, **kwargs):
         auth = request.authorization
+        init()
         if not auth or not check_basic_auth(auth.username, auth.password):
             return authenticate()
         return f(*args, **kwargs)
