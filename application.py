@@ -62,7 +62,6 @@ def requires_basic_auth(f):
 
 def check_basic_auth(username, password):
     init()
-    print basic_username
     return username == basic_username and password == basic_password
 
 
@@ -81,20 +80,31 @@ def get_ads():
     postids = request.args.get('post_ids')
     phone = request.args.get('phone')
     size = request.args.get('size')
+    headings = request.args.get('heading')
+
+    """first line columns names if headings = 1"""
+    if headings is None:
+        headings = '0'
+
     if size is None:
         size = "20"
+
+    if headings == "1":
+        result = "\t".join(bf.ht_headings) + '\n'
+    else:
+        result = ''
 
     try:
         if ad_id is not None:
             ids = [ad_id]
-            return Response(process_results(bf, es.search_es(ElasticSearchManager.create_ids_query(ids), None)), 200)
+            result += process_results(bf, es.search_es(ElasticSearchManager.create_ids_query(ids), None))
+            return Response(result, 200)
     except Exception as e:
         return Response(str(e), 500)
 
     try:
         if postids is not None:
             post_ids = postids.split(',')
-            result = ''
             for post_id in post_ids:
                 res = es.search_es(ElasticSearchManager.create_postid_query(post_id), int(size))
                 hits = res['hits']['hits']
@@ -111,8 +121,9 @@ def get_ads():
     try:
         if phone is not None:
             phones = [phone]
-            return Response(process_results(bf, es.search_es(
-                ElasticSearchManager.create_terms_query(phone_field, phones), int(size))), 200)
+            result += process_results(bf, es.search_es(
+                ElasticSearchManager.create_terms_query(phone_field, phones), int(size)))
+            return Response(result, 200)
     except Exception as e:
         return Response(str(e), 500)
 
@@ -126,16 +137,26 @@ def process_csv():
         print json_data
         es_request = convert_csv_to_esrequest(json_data['csv'])
 
-        if 'size' in json_data:
-            size = json_data['size']
-        else:
+        size = request.args.get('size')
+        headings = request.args.get('heading')
+
+        if size is None:
             size = '20'
+
+        if headings is None:
+            headings = '0'
+
         bf = BulkFolders()
 
-        result = ''
+        if headings == "1":
+            result = "\t".join(bf.ht_headings) + '\n'
+        else:
+            result = ''
+
+        print result
 
         if 'ids' in es_request:
-            result = process_results(bf, esm.search_es(ElasticSearchManager.create_ids_query(es_request['ids']), None))
+            result += process_results(bf, esm.search_es(ElasticSearchManager.create_ids_query(es_request['ids']), None))
         if 'phone' in es_request:
             result += process_results(bf,
                                       esm.search_es(ElasticSearchManager.create_terms_query(phone_field,
@@ -151,16 +172,20 @@ def process_csv():
 def get_user_folders(user):
     bf = BulkFolders()
     password = request.authorization.password
+
+    headings = request.args.get('heading')
+    if headings is None:
+            headings = '0'
     try:
         return Response(bf.construct_tsv_response(
-            bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password)))), 200)
+            bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password))), headings), 200)
     except Exception as e:
         return Response(str(e), 200)
 
 
 def process_results(bf, res):
-    result = ''
     hits = res['hits']['hits']
+    result = ''
     for hit in hits:
         ad = hit['_source']
         tab_separated = "\t".join(bf.ht_to_array(ad))

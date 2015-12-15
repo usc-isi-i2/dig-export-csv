@@ -174,9 +174,12 @@ class BulkFolders(object):
         for line in lines:
             print(line)
 
-    def construct_tsv_response(self, lines):
+    def construct_tsv_response(self, lines, heading):
         self.write_tsv('folder_export.tsv', lines)
-        tsv_response = 'folder\t' + '\t'.join(self.ht_headings)+'\n'
+        if heading == "1":
+            tsv_response = 'folder\t' + '\t'.join(self.ht_headings)+'\n'
+        else:
+            tsv_response = ''
         tsv_response += '\n'.join(lines)
         return tsv_response
 
