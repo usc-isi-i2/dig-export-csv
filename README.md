@@ -37,14 +37,14 @@ Retrieves the ads for a given user from all folders.
 
 **Example:**
 ```      
-curl -u <user>:<password> localhost:5000/api/users/memex/folders/_all/ads
+curl -u <username>:<password> localhost:5000/api/users/memex/folders/_all/ads
 ```   
 ###GET /api/ads?post_ids='id1,id2,id3'
 Retrieves the ads that contain the given post ids in the url of the ad
 
 **Method:** GET
 
-**Basic Authentication:** NO
+**Basic Authentication:** YES
 
 **Parameters:**
 
@@ -55,14 +55,14 @@ Retrieves the ads that contain the given post ids in the url of the ad
 
 **Example:**
 ```      
-curl localhost:5000/api/ads?post_ids='20212377,20212378&size=40'
+curl -u <username>:<password> localhost:5000/api/ads?post_ids='20212377,20212378&size=40'
 ```   
 ###GET /api/ads?uri='a uri goes here'
 Retrieve the ad that has the given URI
 
 **Method:** GET
 
-**Basic Authentication:** NO
+**Basic Authentication:** YES
 
 **Parameters:**
 
@@ -72,14 +72,14 @@ Retrieve the ad that has the given URI
 
 **Example:**
 ```      
-curl localhost:5000/api/ads?uri=http://dig.isi.edu/ht/data/page/47561AE61432324E428A67DA4763EAA1DB1809F7/1440921440000/processed
+curl -u <username>:<password> localhost:5000/api/ads?uri=http://dig.isi.edu/ht/data/page/47561AE61432324E428A67DA4763EAA1DB1809F7/1440921440000/processed
 ```
 ###GET api/ads?phone='a phone goes here'
 Retrieve all the ads that contain the given phone.
 
 **Method:** GET
 
-**Basic Authentication:** NO
+**Basic Authentication:** YES
 
 **Parameters:**
 
@@ -90,14 +90,14 @@ Retrieve all the ads that contain the given phone.
 
 **Example:**
 ```      
-curl localhost:5000/api/ads?phone=8104496460
+curl -u <username>:<password> localhost:5000/api/ads?phone=8104496460
 ```
 ###POST api/ads/bulk-query
 Fetch the ads that satisfy the query given in the body. The query consists of a CSV file with a spec per line. The spec contains headings such as URI, phone.
 
 **Method:** POST
 
-**Basic Authentication:** NO
+**Basic Authentication:** YES
 
 **Parameters:**
 
@@ -108,5 +108,5 @@ Fetch the ads that satisfy the query given in the body. The query consists of a 
 
 **Example:**
 ```      
-curl -X POST  localhost:5000/api/ads/bulk-query -d '{"csv":["http://dig.isi.edu/ht/data/page/47561AE61432324E428A67DA4763EAA1DB1809F7/1440921440000/processed,8104496460"]}'
+curl -X POST -u <username>:<password>  localhost:5000/api/ads/bulk-query -d '{"csv":["http://dig.isi.edu/ht/data/page/47561AE61432324E428A67DA4763EAA1DB1809F7/1440921440000/processed,8104496460"]}'
 ```
