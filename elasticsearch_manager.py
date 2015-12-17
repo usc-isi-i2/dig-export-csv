@@ -21,6 +21,7 @@ class ElasticSearchManager(object):
         self.esusername = configuration.get('ElasticSearch', 'username')
         self.espassword = configuration.get('ElasticSearch', 'password')
         self.es = self.get_es_object()
+        self.num_of_retries = 3
 
     def get_es_object(self):
 
@@ -34,9 +35,16 @@ class ElasticSearchManager(object):
         return es
 
     def search_es(self, query, size):
-
         if size is not None:
             query['size'] = size
+
+        for i in range(0, self.num_of_retries):
+            print 'Trial:', i
+            res = self.es.search(index=self.index, doc_type=self.type, body=json.dumps(query))
+            if res['timed_out'] is False:
+                return res
+
+        # try one last time
         res = self.es.search(index=self.index, doc_type=self.type, body=json.dumps(query))
         return res
 
