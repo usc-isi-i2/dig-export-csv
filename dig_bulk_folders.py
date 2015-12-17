@@ -110,7 +110,7 @@ class BulkFolders(object):
         eg "els.istresearch.com:39200"
         """
         esm = ElasticSearchManager()
-        results = esm.search_es(ElasticSearchManager.create_ids_query(uri_list), None)
+        results = esm.search_es(ElasticSearchManager.create_ids_query(uri_list), len(uri_list))
         hits = results['hits']['hits']
         return map(lambda x: x['_source'], hits)
 
