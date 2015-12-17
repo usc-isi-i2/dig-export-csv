@@ -156,7 +156,8 @@ def process_csv():
         print result
 
         if 'ids' in es_request:
-            result += process_results(bf, esm.search_es(ElasticSearchManager.create_ids_query(es_request['ids']), None))
+            result += process_results(bf, esm.search_es(ElasticSearchManager.create_ids_query
+                                                        (es_request['ids']), len(es_request['ids'])))
         if 'phone' in es_request:
             result += process_results(bf,
                                       esm.search_es(ElasticSearchManager.create_terms_query(phone_field,
