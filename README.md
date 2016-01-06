@@ -35,10 +35,11 @@ Retrieves the ads for a given user from all folders.
 | --------- | ----------- | -------- |
 | user  | dig user name | Yes |
 | heading  | 1 to get the column names as first line, by default 0  | No |
+| store  | 1 to download the file as data.tsv, by default 0  | No |
 
 **Example:**
 ```      
-curl -u <username>:<password> localhost:5000/api/users/memex/folders/_all/ads?heading=1
+curl -u <username>:<password> localhost:5000/api/users/memex/folders/_all/ads?heading=1&store=1
 ```   
 ###GET /api/ads?post_ids='id1,id2,id3'
 Retrieves the ads that contain the given post ids in the url of the ad
@@ -54,6 +55,7 @@ Retrieves the ads that contain the given post ids in the url of the ad
 | post_ids  | comma separated string of post ids | Yes |
 | size  | number of ads returned per post id, default = 20 | No |
 | heading  | 1 to get the column names as first line, by default 0  | No |
+| store  | 1 to download the file as data.tsv, by default 0  | No |
 
 **Example:**
 ```      
@@ -72,6 +74,7 @@ Retrieve the ad that has the given URI
 | --------- | ----------- | -------- |
 | uri  | uri of the ad as indexed in ElasticSearch | Yes |
 | heading  | 1 to get the column names as first line, by default 0  | No |
+| store  | 1 to download the file as data.tsv, by default 0  | No |
 
 **Example:**
 ```      
@@ -91,10 +94,11 @@ Retrieve all the ads that contain the given phone.
 | phone  | phone number to be searched in ads | Yes |
 | size  | number of ads returned, default = 20 | No |
 | heading  | 1 to get the column names as first line, by default 0  | No |
+| store  | 1 to download the file as data.tsv, by default 0  | No |
 
 **Example:**
 ```      
-curl -u <username>:<password> 'localhost:5000/api/ads?phone=8104496460&heading=1'
+curl -u <username>:<password> 'localhost:5000/api/ads?phone=8104496460&heading=1&store=1'
 ```
 ###POST api/ads/bulk-query
 Fetch the ads that satisfy the query given in the body. The query consists of a CSV file with a spec per line. The spec contains headings such as URI, phone.
@@ -110,6 +114,7 @@ Fetch the ads that satisfy the query given in the body. The query consists of a 
 | csv  | lines in the format uri,phone | Yes |
 | size  | number of ads returned matching phone numbers, default = 20 | No |
 | heading  | 1 to get the column names as first line, by default 0  | No |
+| store  | 1 to download the file as data.tsv, by default 0  | No |
 
 **Example:**
 ```      
