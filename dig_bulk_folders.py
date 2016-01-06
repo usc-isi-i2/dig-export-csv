@@ -146,9 +146,11 @@ class BulkFolders(object):
     def get_folders(self, username, password):
         """Return JSON array of folder contents"""
 
-        credentials = username + ":" + password
+        credentials = bytes(username + ":" + password)
         conn = HTTPSConnection(self.bulkfoldersurl)
-        userandpass = b64encode(credentials).decode("ascii")
+        # userandpass = b64encode(credentials).decode("ascii")
+        userandpass = b64encode(credentials).decode("ISO-8859-1")
+
         headers = {
             'cache-control': "no-cache",
             'Authorization': 'Basic %s' % userandpass
@@ -158,6 +160,7 @@ class BulkFolders(object):
 
         res = conn.getresponse()
         data = res.read()
+
         return json.loads(data.decode("utf-8"))
 
     def format_tsv_lines(self, lines):

@@ -3,6 +3,7 @@ __author__ = 'amandeep'
 import json
 from flask import request
 from flask import Response
+from flask import make_response
 from functools import wraps
 from flask import Flask
 from elasticsearch_manager import ElasticSearchManager
@@ -81,6 +82,7 @@ def get_ads():
     phone = request.args.get('phone')
     size = request.args.get('size')
     headings = request.args.get('heading')
+    store = request.args.get('store')
 
     """first line columns names if headings = 1"""
     if headings is None:
@@ -94,11 +96,20 @@ def get_ads():
     else:
         result = ''
 
+    if store is None:
+        store = "0"
+
     try:
         if ad_id is not None:
             ids = [ad_id]
             result += process_results(bf, es.search_es(ElasticSearchManager.create_ids_query(ids), None))
-            return Response(result, 200)
+
+            if store == "1":
+                response = make_response(result)
+                response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+                return response
+            else:
+                return Response(result, 200)
     except Exception as e:
         return Response(str(e), 500)
 
@@ -114,7 +125,12 @@ def get_ads():
                         tab_separated = "\t".join(bf.ht_to_array(ad))
                         result = result + tab_separated + '\n'
 
-            return Response(result, 200)
+            if store == "1":
+                response = make_response(result)
+                response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+                return response
+            else:
+                return Response(result, 200)
     except Exception as e:
         return Response(str(e), 500)
 
@@ -123,7 +139,13 @@ def get_ads():
             phones = [phone]
             result += process_results(bf, es.search_es(
                 ElasticSearchManager.create_terms_query(phone_field, phones), int(size)))
-            return Response(result, 200)
+
+            if store == "1":
+                response = make_response(result)
+                response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+                return response
+            else:
+                return Response(result, 200)
     except Exception as e:
         return Response(str(e), 500)
 
@@ -139,12 +161,16 @@ def process_csv():
 
         size = request.args.get('size')
         headings = request.args.get('heading')
+        store = request.args.get('store')
 
         if size is None:
             size = '20'
 
         if headings is None:
             headings = '0'
+
+        if store is None:
+            store = '0'
 
         bf = BulkFolders()
 
@@ -162,8 +188,12 @@ def process_csv():
             result += process_results(bf,
                                       esm.search_es(ElasticSearchManager.create_terms_query(phone_field,
                                                     es_request['phone']), int(size)))
-
-        return Response(result, 200)
+        if store == "1":
+            response = make_response(result)
+            response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+            return response
+        else:
+            return Response(result, 200)
     except Exception as e:
         return Response(str(e), 500)
 
@@ -175,13 +205,24 @@ def get_user_folders(user):
     password = request.authorization.password
 
     headings = request.args.get('heading')
+    store = request.args.get('store')
+
+    if store is None:
+        store = '0'
+
     if headings is None:
             headings = '0'
     try:
-        return Response(bf.construct_tsv_response(
-            bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password))), headings), 200)
+        if store == "1":
+            response = make_response(bf.construct_tsv_response(
+                bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password))), headings))
+            response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+            return response
+        else:
+            return Response(bf.construct_tsv_response(
+                bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password))), headings), 200)
     except Exception as e:
-        return Response(str(e), 200)
+        return Response(str(e), 500)
 
 
 def process_results(bf, res):
