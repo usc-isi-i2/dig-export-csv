@@ -106,7 +106,7 @@ def get_ads():
 
             if store == "1":
                 response = make_response(result)
-                response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+                response.headers["Content-Disposition"] = "attachment; filename=data.tsv"
                 return response
             else:
                 return Response(result, 200)
@@ -127,7 +127,7 @@ def get_ads():
 
             if store == "1":
                 response = make_response(result)
-                response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+                response.headers["Content-Disposition"] = "attachment; filename=data.tsv"
                 return response
             else:
                 return Response(result, 200)
@@ -142,7 +142,7 @@ def get_ads():
 
             if store == "1":
                 response = make_response(result)
-                response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+                response.headers["Content-Disposition"] = "attachment; filename=data.tsv"
                 return response
             else:
                 return Response(result, 200)
@@ -190,7 +190,7 @@ def process_csv():
                                                     es_request['phone']), int(size)))
         if store == "1":
             response = make_response(result)
-            response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+            response.headers["Content-Disposition"] = "attachment; filename=data.tsv"
             return response
         else:
             return Response(result, 200)
@@ -216,7 +216,7 @@ def get_user_folders(user):
         if store == "1":
             response = make_response(bf.construct_tsv_response(
                 bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password))), headings))
-            response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+            response.headers["Content-Disposition"] = "attachment; filename=data.tsv"
             return response
         else:
             return Response(bf.construct_tsv_response(
