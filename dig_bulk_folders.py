@@ -14,7 +14,8 @@ class BulkFolders(object):
             'phonenumber_feature',
             'place_postalAddress_feature',
             'provider_name_feature',
-            'person_age_feature'
+            'person_age_feature',
+            'emailaddress_feature'
             ]
 
         self.ht_headings = [
