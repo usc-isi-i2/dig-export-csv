@@ -97,7 +97,7 @@ def get_ads():
         result = ''
 
     if store is None:
-        store = "0"
+        store = "1"
 
     try:
         if ad_id is not None:
@@ -170,7 +170,7 @@ def process_csv():
             headings = '0'
 
         if store is None:
-            store = '0'
+            store = '1'
 
         bf = BulkFolders()
 
@@ -208,7 +208,7 @@ def get_user_folders(user):
     store = request.args.get('store')
 
     if store is None:
-        store = '0'
+        store = '1'
 
     if headings is None:
             headings = '0'
