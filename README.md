@@ -17,7 +17,7 @@ Open a terminal,
 
 ##Running the webservice   
 In a terminal, type   
-```python process_request.py```  
+```python application.py```  
 You should see a message  
 ``` * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)```  
 
