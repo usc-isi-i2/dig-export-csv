@@ -22,7 +22,7 @@ You should see a message
 ``` * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)```  
 
 ##API    
-###GET /api/users/\<user\>/folders/<folder_name>/ads  
+###GET /api/users/\<user\>/folders/\<folder_name\>/ads  
 Retrieves the ads for a given user from all folders.
 
 **Method:** GET
