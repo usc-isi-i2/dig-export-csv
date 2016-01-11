@@ -22,7 +22,7 @@ You should see a message
 ``` * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)```  
 
 ##API    
-###GET /api/users/\<user\>/folders/_all/ads  
+###GET /api/users/\<user\>/folders/<folder_name>/ads  
 Retrieves the ads for a given user from all folders.
 
 **Method:** GET
@@ -34,6 +34,7 @@ Retrieves the ads for a given user from all folders.
 | Parameter | Description | Required |
 | --------- | ----------- | -------- |
 | user  | dig user name | Yes |
+| folder_name  | folder name from which to get the ads from, _all for all folders | Yes |
 | heading  | 1 to get the column names as first line, by default 0  | No |
 | store  | 1 to download the file as data.tsv, by default 1  | No |
 
@@ -41,6 +42,9 @@ Retrieves the ads for a given user from all folders.
 ```      
 curl -u <username>:<password> localhost:5000/api/users/memex/folders/_all/ads?heading=1&store=1
 ```   
+```
+curl -u <username>:<password> localhost:5000/api/users/memex/folders/December%20HT/ads?heading=1&store=1
+```
 ###GET /api/ads?post_ids='id1,id2,id3'
 Retrieves the ads that contain the given post ids in the url of the ad
 
