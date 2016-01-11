@@ -198,12 +198,13 @@ def process_csv():
         return Response(str(e), 500)
 
 
-@application.route('/api/users/<user>/folders/_all/ads', methods=['GET'])
+"""folder_name = _all for all folders"""
+@application.route('/api/users/<user>/folders/<folder_name>/ads', methods=['GET'])
 @requires_auth
-def get_user_folders(user):
+def get_user_folders(user, folder_name):
     bf = BulkFolders()
     password = request.authorization.password
-
+    print folder_name
     headings = request.args.get('heading')
     store = request.args.get('store')
 
@@ -215,7 +216,7 @@ def get_user_folders(user):
     try:
         if store == "1":
             response = make_response(bf.construct_tsv_response(
-                bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password))), headings))
+                bf.dereference_uris(bf.construct_uri_to_folder_map(bf.get_folders(user, password), folder_name)), headings))
             response.headers["Content-Disposition"] = "attachment; filename=data.tsv"
             return response
         else:

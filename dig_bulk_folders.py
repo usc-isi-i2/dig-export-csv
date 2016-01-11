@@ -125,12 +125,26 @@ class BulkFolders(object):
             entry.append(name)
             dictionary[uri] = entry
 
-    def construct_uri_to_folder_map(self, folder_list):
+    def construct_uri_to_folder_map(self, folder_list, folder_name):
         """Convert a list of folders into a dictionary {uri: [folders]}"""
         uri_to_folders_map = {}
-        for folder in folder_list:
+        relevant_folder_list = BulkFolders.get_folder(folder_name, folder_list)
+        for folder in relevant_folder_list:
             self.add_folder_to_uri_to_folder_map(folder, uri_to_folders_map)
         return uri_to_folders_map
+
+    @staticmethod
+    def get_folder(folder_name, folder_list):
+        result_folder_list = []
+        print folder_name
+        if folder_name == '_all':
+            return folder_list
+
+        for folder in folder_list:
+            if folder['name'] == folder_name:
+                result_folder_list.append(folder)
+                break
+        return result_folder_list
 
     def dereference_uris(self, dictionary):
 
