@@ -41,6 +41,7 @@ class ElasticSearchManager(object):
         for i in range(0, self.num_of_retries):
             print 'Trial:', i
             res = self.es.search(index=self.index, doc_type=self.type, body=json.dumps(query))
+            print res
             if res['timed_out'] is False:
                 return res
             else:
@@ -49,6 +50,7 @@ class ElasticSearchManager(object):
 
         # try one last time
         res = self.es.search(index=self.index, doc_type=self.type, body=json.dumps(query))
+
         return res
 
     @staticmethod
