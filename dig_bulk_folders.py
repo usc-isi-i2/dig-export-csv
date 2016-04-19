@@ -40,12 +40,15 @@ class BulkFolders(object):
         multiple values we get an array and return the values separated with |."""
         # Possible fix needed here to convert the result to unicode instead of
         # using str()
-        if isinstance(obj_or_array, list):
-            result = "|".join(map(lambda x: str(x['featureValue']), obj_or_array))
-        else:
-            result = str(obj_or_array['featureValue'])
-        if result is None:
-            result = ''
+        try:
+            if isinstance(obj_or_array, list):
+                result = "|".join(map(lambda x: str(x['featureValue']), obj_or_array))
+            else:
+                result = str(obj_or_array['featureValue'])
+            if result is None:
+                result = ''
+        except:
+            return ''
 
         return result
 
@@ -136,7 +139,7 @@ class BulkFolders(object):
     @staticmethod
     def get_folder(folder_name, folder_list):
         result_folder_list = []
-        print folder_name
+        # print folder_name
         if folder_name == '_all':
             return folder_list
 

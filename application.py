@@ -156,7 +156,6 @@ def process_csv():
     try:
         json_data = json.loads(str(request.get_data()))
         esm = ElasticSearchManager()
-        print json_data
         es_request = convert_csv_to_esrequest(json_data['csv'])
 
         size = request.args.get('size')
@@ -179,7 +178,7 @@ def process_csv():
         else:
             result = ''
 
-        print result
+        # print result
 
         if 'ids' in es_request:
             result += process_results(bf, esm.search_es(ElasticSearchManager.create_ids_query
@@ -204,7 +203,7 @@ def process_csv():
 def get_user_folders(user, folder_name):
     bf = BulkFolders()
     password = request.authorization.password
-    print folder_name
+    # print folder_name
     headings = request.args.get('heading')
     store = request.args.get('store')
 
